@@ -1,23 +1,27 @@
 package dev.giancarlo.cyborgdata.service;
 
+import dev.giancarlo.cyborgdata.model.dto.PendenteDTO;
 import dev.giancarlo.cyborgdata.model.PendenteResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 public class PendenteService {
 
-    @Value("${external.api.url}")
-    private String externalApiUrl;
+    private final WebClient webClient;
 
-    private final RestTemplate restTemplate;
-
-    public PendenteService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public PendenteService(WebClient webClient) {
+        this.webClient = webClient;
     }
 
-    public PendenteResponse getPendenteData() {
-        return restTemplate.getForObject(externalApiUrl, PendenteResponse.class);
+    public Mono<List<PendenteDTO>> buscarPendentes() {
+        return webClient.get()
+                .uri("/api/pendente")
+                .retrieve()
+                .bodyToMono(PendenteResponse.class)
+                .map(PendenteResponse::getData); // Retorna a lista de PendenteDTO
     }
 }
