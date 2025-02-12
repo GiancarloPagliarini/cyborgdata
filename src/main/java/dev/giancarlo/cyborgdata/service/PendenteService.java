@@ -1,11 +1,11 @@
 package dev.giancarlo.cyborgdata.service;
 
-import dev.giancarlo.cyborgdata.model.dto.PendenteDTO;
-import dev.giancarlo.cyborgdata.model.PendenteResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import dev.giancarlo.cyborgdata.dto.PendenteResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,11 +17,26 @@ public class PendenteService {
         this.webClient = webClient;
     }
 
-    public Mono<List<PendenteDTO>> buscarPendentes() {
-        return webClient.get()
-                .uri("/api/pendente")
+    public List<PendenteResponseDTO> buscarPendentes() {
+        JsonNode response = webClient.get()
+                .uri("/api/pendente") // Apenas o path, pois a baseUrl já está configurada
                 .retrieve()
-                .bodyToMono(PendenteResponse.class)
-                .map(PendenteResponse::getData); // Retorna a lista de PendenteDTO
+                .bodyToMono(JsonNode.class)
+                .block(); // Bloqueia até obter a resposta (sincrono)
+
+        if (response == null || !response.get("success").asBoolean()) {
+            throw new RuntimeException("Erro ao buscar dados externos");
+        }
+
+        List<PendenteResponseDTO> lista = new ArrayList<>();
+        for (JsonNode node : response.get("data")) {
+            lista.add(new PendenteResponseDTO(
+                    node.get("hash").asText(),
+                    node.get("company").asText()
+            ));
+        }
+        return lista;
     }
 }
+
+
