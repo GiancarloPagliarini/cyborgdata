@@ -97,7 +97,7 @@ GET /api/rel
 
 ---
 
-### 4️⃣ Dificuldades e Considerações importantes
+### 4️⃣ Dificuldades e Considerações importantes ❗
 Primeiramente, **agradeço pela oportunidade de realizar o teste** 😄. Gostaria de destacar, de forma resumida, as principais dificuldades que encontrei durante o desenvolvimento.
 
 Uma das maiores dificuldades foi a leitura dos arquivos **.csv**, principalmente devido ao seu tamanho e formatação, o que tornou o processamento mais complexo. 
