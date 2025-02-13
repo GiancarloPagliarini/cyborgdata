@@ -1,16 +1,12 @@
 package dev.giancarlo.cyborgdata.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class Processamento {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,4 +19,7 @@ public class Processamento {
 
     @Lob
     private String relatorioJson;
+
+    @Lob
+    private String conteudoCsv;
 }

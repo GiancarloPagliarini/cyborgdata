@@ -21,7 +21,8 @@ public class PendenteController {
 
     @GetMapping("/pendente")
     public ResponseEntity<List<PendenteResponseDTO>> obterPendentes() {
-        return ResponseEntity.ok(pendenteService.buscarPendentes());
+        List<PendenteResponseDTO> pendentes = pendenteService.buscarPendentes();
+        return ResponseEntity.ok(pendentes);
     }
 
 }

@@ -12,17 +12,19 @@ import java.util.List;
 public class PendenteService {
 
     private final WebClient webClient;
+    private final ProcessamentoService processamentoService;
 
-    public PendenteService(WebClient webClient) {
+    public PendenteService(WebClient webClient, ProcessamentoService processamentoService) {
         this.webClient = webClient;
+        this.processamentoService = processamentoService;
     }
 
     public List<PendenteResponseDTO> buscarPendentes() {
         JsonNode response = webClient.get()
-                .uri("/api/pendente") // Apenas o path, pois a baseUrl já está configurada
+                .uri("/api/pendente")
                 .retrieve()
                 .bodyToMono(JsonNode.class)
-                .block(); // Bloqueia até obter a resposta (sincrono)
+                .block();
 
         if (response == null || !response.get("success").asBoolean()) {
             throw new RuntimeException("Erro ao buscar dados externos");
@@ -30,11 +32,16 @@ public class PendenteService {
 
         List<PendenteResponseDTO> lista = new ArrayList<>();
         for (JsonNode node : response.get("data")) {
-            lista.add(new PendenteResponseDTO(
-                    node.get("hash").asText(),
-                    node.get("company").asText()
-            ));
+            String hash = node.get("hash").asText();
+            String company = node.get("company").asText();
+
+            // Adiciona o item na lista
+            lista.add(new PendenteResponseDTO(hash, company));
+
+            // Inicia o processamento de forma assíncrona
+            processamentoService.iniciarProcessamento(hash, company);
         }
+
         return lista;
     }
 }
