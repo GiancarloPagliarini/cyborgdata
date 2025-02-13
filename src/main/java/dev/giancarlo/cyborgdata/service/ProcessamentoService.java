@@ -1,7 +1,7 @@
 package dev.giancarlo.cyborgdata.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import dev.giancarlo.cyborgdata.model.Funcionario;
+//import dev.giancarlo.cyborgdata.model.Funcionario;
 import dev.giancarlo.cyborgdata.model.Processamento;
 import dev.giancarlo.cyborgdata.repository.ProcessamentoRepository;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -146,62 +146,5 @@ public class ProcessamentoService {
                 .filter(p -> "Completed".equals(p.getStatus())) // Filtra apenas os finalizados
                 .map(Processamento::getHash)
                 .collect(Collectors.toList());
-    }
-
-    public void processarCsvEImportarParaBanco(String hash) {
-        try {
-            // Caminho do CSV no diretório temporário
-            String tempDir = System.getProperty("java.io.tmpdir");
-            Path filePath = Path.of(tempDir, "tmp", hash + ".csv");
-
-            System.out.println("Processando arquivo CSV: " + filePath.toAbsolutePath());
-
-            // Verificar se o arquivo existe
-            if (!Files.exists(filePath)) {
-                throw new RuntimeException("Arquivo CSV não encontrado: " + filePath.toAbsolutePath());
-            }
-
-            // Criar uma lista para armazenar os funcionários
-            List<Funcionario> funcionarios = new ArrayList<>();
-
-            try (CSVReader csvReader = new CSVReader(new FileReader(filePath.toFile()))) {
-                String[] valores;
-                boolean isFirstLine = true; // Para ignorar o cabeçalho
-
-                while ((valores = csvReader.readNext()) != null) {
-                    if (isFirstLine) {
-                        System.out.println("Ignorando cabeçalho: " + String.join(",", valores));
-                        isFirstLine = false;
-                        continue;
-                    }
-
-                    // Verificar se a linha tem 3 colunas (Nome, Cidade, Idade)
-                    if (valores.length < 3) {
-                        System.out.println("Linha inválida, ignorando: " + String.join(",", valores));
-                        continue;
-                    }
-
-                    try {
-                        String nome = valores[0].trim();
-                        String cidade = valores[1].trim();
-                        int idade = Integer.parseInt(valores[2].trim());
-
-                        Funcionario funcionario = new Funcionario(null, nome, cidade, idade);
-                        funcionarios.add(funcionario);
-                    } catch (NumberFormatException e) {
-                        System.out.println("ERRO: Idade inválida para número: " + valores[2] + ". Linha ignorada.");
-                    }
-                }
-            } catch (CsvValidationException e) {
-                throw new RuntimeException("Erro ao validar CSV", e);
-            }
-
-            // Salvar todos os funcionários no banco
-            funcionarioRepository.saveAll(funcionarios);
-            System.out.println("Importação concluída! " + funcionarios.size() + " funcionários salvos no banco.");
-
-        } catch (IOException e) {
-            throw new RuntimeException("Erro ao processar CSV do hash: " + hash, e);
-        }
     }
 }
